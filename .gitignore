@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+*.DS_Store
+._*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Maven / Gradle / Java build
+target/
+build/
+.out/
+*.log
+
+# Node / fe
+node_modules/
+dist/
+build/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
+
+# upload
+uploads/
+server/uploads/
