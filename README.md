@@ -1,18 +1,18 @@
 # BookingHouse Web App
 
-BookingHouse is a full-stack property booking platform inspired by modern rental apps. It supports geospatial search, robust booking logic, and secure multi-tenant authentication for hosts and guests.
+BookingHouse is a full-stack property booking platform inspired by modern rental apps. It supports geospatial search, robust booking logic, and secure authentication for both hosts and guests.
 
 ---
 
 ## Features
 
 - Property listing and booking management  
-- Radius-based geospatial search over 10,000+ records with sub-200ms responses  
+- Radius-based geospatial search over 10,000+ records  
 - Stateless JWT-based authentication with role-specific authorization  
-- Support for both hosts (listing properties) and guests (booking properties)  
+- Separate flows for **HOST** (list properties) and **GUEST** (book properties)  
 - Booking conflict checks and availability validation to prevent double-booking  
-- Transaction-safe updates and consistency guarantees for booking operations  
-- Cloud deployment with integration between backend and hosted frontend  
+- Transaction-safe updates to keep booking state consistent  
+- Cloud deployment with separate backend and frontend hosting  
 
 ---
 
@@ -23,7 +23,7 @@ BookingHouse is a full-stack property booking platform inspired by modern rental
 - Java, Spring Boot  
 - Spring Security (JWT)  
 - Spring Data JPA / Hibernate  
-- PostgreSQL + Hibernate Spatial (PostGIS) for geospatial queries  
+- PostgreSQL + PostGIS / Hibernate Spatial for geospatial queries  
 
 **Frontend**
 
@@ -33,57 +33,53 @@ BookingHouse is a full-stack property booking platform inspired by modern rental
 
 **Cloud & DevOps**
 
-- Google Cloud Platform for backend deployment (e.g., Cloud Run / GCE)  
-- AWS Amplify or similar hosting for React frontend  
-- Centralized logging & monitoring (e.g., GCP logs / dashboards)  
+- Google Cloud Platform for backend deployment  
+- AWS Amplify (or similar) for React frontend hosting  
+- Basic logging and monitoring on cloud platform  
 
 ---
 
 ## Architecture Overview
 
-- **Authentication & Authorization**
-  - Stateless JWT-based auth with Spring Security.
-  - Different roles for **HOST** and **GUEST**, controlling access to listing/booking endpoints.
-  - Login and registration endpoints issue JWTs stored on the client side.
+- **Authentication & Authorization**  
+  - Stateless JWT-based auth with Spring Security.  
+  - Different roles for **HOST** and **GUEST** control which endpoints can be called.  
 
-- **Geospatial Search**
-  - Properties stored with latitude/longitude in PostgreSQL using Hibernate Spatial / PostGIS.
-  - Radius-based search queries using spatial indices for fast lookups.
-  - API supports parameters like `lat`, `lng`, and `radius` for nearby listings.
+- **Geospatial Search**  
+  - Property locations stored as spatial columns in PostgreSQL.  
+  - Radius-based search using spatial indices for fast “nearby” queries.  
 
-- **Booking Logic**
-  - Create/update bookings with conflict detection:
-    - No overlapping date ranges for the same property.
-    - Validation on both start/end dates and property ID.
-  - Transaction-safe operations to avoid race conditions and double-booking.
-  - Clear status fields for bookings (e.g., PENDING, CONFIRMED, CANCELLED).
+- **Booking Logic**  
+  - Creates bookings only when dates are available (no overlapping ranges for the same property).  
+  - Uses transactional operations to avoid race conditions and double-booking.  
+  - Clear booking status (e.g. PENDING, CONFIRMED, CANCELLED).  
 
-- **Frontend**
-  - React + Ant Design for a responsive, modern UI.
-  - Forms with validation for login, registration, property creation, and booking.
-  - Uses async/await with Fetch / Axios to consume REST APIs.
-  - Role-aware UI: different views/actions for hosts vs. guests.
+- **Frontend**  
+  - React + Ant Design for modern, responsive UI.  
+  - Forms for login/register, create listing, and booking.  
+  - Uses async/await with Axios/Fetch to call REST APIs.  
 
 ---
 
-## Main Project Structure
+## Project Structure
+
 ```text
 booking-house/
 ├── backend/
 │   ├── src/main/java/com/yourorg/booking/
 │   │   ├── BookingHouseApplication.java
-│   │   ├── config/          # Security, JWT, CORS, etc.
-│   │   ├── controller/      # REST controllers (auth, property, booking)
-│   │   ├── dto/             # Request/response DTOs
-│   │   ├── entity/          # JPA entities (User, Property, Booking, etc.)
-│   │   ├── repository/      # Spring Data JPA repositories
-│   │   └── service/         # Business logic
+│   │   ├── config/        # Security, JWT, CORS, etc.
+│   │   ├── controller/    # REST controllers (auth, property, booking)
+│   │   ├── dto/           # Request/response DTOs
+│   │   ├── entity/        # User, Property, Booking, etc.
+│   │   ├── repository/    # Spring Data JPA repositories
+│   │   └── service/       # Business logic
 │   └── src/main/resources/
-│       └── application.yml  # DB, JWT secret, etc.
+│       └── application.yml
 └── frontend/
     ├── src/
     │   ├── components/
     │   ├── pages/
-    │   ├── services/        # API clients
+    │   ├── services/      # API clients
     │   └── App.jsx
     └── package.json
